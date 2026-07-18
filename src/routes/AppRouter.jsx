@@ -1,5 +1,8 @@
+// src/routes/AppRouter.jsx
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import MainLayout from "../layouts/MainLayout";
 import Home from "../pages/Home";
 import Battle from "../pages/Battle";
 import Pokedex from "../pages/Pokedex";
@@ -10,10 +13,13 @@ export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/battle" element={<Battle />} />
-        <Route path="/pokedex" element={<Pokedex />} />
-        <Route path="/team-builder" element={<TeamBuilder />} />
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/pokedex" element={<Pokedex />} />
+          <Route path="/battle" element={<Battle />} />
+          <Route path="/team-builder" element={<TeamBuilder />} />
+        </Route>
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
