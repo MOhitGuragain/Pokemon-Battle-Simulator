@@ -1,37 +1,29 @@
 export default function PokemonInfo({ pokemon }) {
   return (
-    <div className="mt-6 rounded-xl border bg-white p-6 shadow-md">
-      <h2 className="mb-4 text-2xl font-bold">
+    <section className="rounded-3xl bg-white p-8 shadow-xl">
+      <h2 className="mb-8 text-3xl font-bold text-gray-800">
         Basic Information
       </h2>
 
-      <div className="grid grid-cols-2 gap-6 text-center md:grid-cols-3">
-        <div>
-          <p className="text-sm text-gray-500">Height</p>
-          <p className="text-xl font-semibold">
-            {pokemon.height}
-          </p>
-        </div>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <InfoCard
+          title="Height"
+          value={`${pokemon.height / 10} m`}
+        />
 
-        <div>
-          <p className="text-sm text-gray-500">Weight</p>
-          <p className="text-xl font-semibold">
-            {pokemon.weight}
-          </p>
-        </div>
+        <InfoCard
+          title="Weight"
+          value={`${pokemon.weight / 10} kg`}
+        />
 
-        <div>
-          <p className="text-sm text-gray-500">
-            Base Experience
-          </p>
-          <p className="text-xl font-semibold">
-            {pokemon.base_experience}
-          </p>
-        </div>
+        <InfoCard
+          title="Experience"
+          value={pokemon.base_experience}
+        />
       </div>
 
-      <div className="mt-8">
-        <h3 className="mb-3 text-lg font-semibold">
+      <div className="mt-10">
+        <h3 className="mb-4 text-xl font-semibold text-gray-700">
           Abilities
         </h3>
 
@@ -39,13 +31,27 @@ export default function PokemonInfo({ pokemon }) {
           {pokemon.abilities.map((ability) => (
             <span
               key={ability.ability.name}
-              className="rounded-full bg-gray-200 px-4 py-2 capitalize"
+              className="rounded-full bg-gray-100 px-4 py-2 font-medium capitalize shadow"
             >
               {ability.ability.name.replace("-", " ")}
             </span>
           ))}
         </div>
       </div>
+    </section>
+  );
+}
+
+function InfoCard({ title, value }) {
+  return (
+    <div className="rounded-2xl bg-gray-50 p-6 text-center shadow">
+      <p className="text-sm uppercase tracking-wide text-gray-500">
+        {title}
+      </p>
+
+      <p className="mt-2 text-2xl font-bold text-gray-800">
+        {value}
+      </p>
     </div>
   );
 }

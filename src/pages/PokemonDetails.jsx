@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { usePokemon } from "../hooks/usePokemon";
 
@@ -8,12 +8,13 @@ import PokemonStats from "../components/pokemon/PokemonStats";
 
 export default function PokemonDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const { data, isLoading, isError, error } = usePokemon(id);
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-xl">
+      <div className="flex min-h-screen items-center justify-center text-xl font-semibold">
         Loading Pokémon...
       </div>
     );
@@ -28,10 +29,27 @@ export default function PokemonDetails() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl p-8 space-y-6">
+    <main className="mx-auto max-w-6xl p-6 md:p-8">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-6 flex items-center gap-2 rounded-xl bg-gray-800 px-5 py-2 font-medium text-white shadow transition hover:bg-gray-700"
+      >
+        ← Back to Pokédex
+      </button>
+
+      {/* Pokémon Header */}
       <PokemonHeader pokemon={data} />
-      <PokemonInfo pokemon={data} />
-      <PokemonStats pokemon={data} />
+
+      {/* Information */}
+      <div className="mt-8">
+        <PokemonInfo pokemon={data} />
+      </div>
+
+      {/* Stats */}
+      <div className="mt-8">
+        <PokemonStats pokemon={data} />
+      </div>
     </main>
   );
 }

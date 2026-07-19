@@ -2,12 +2,12 @@ import StatBar from "./StatBar";
 
 export default function PokemonStats({ pokemon }) {
   return (
-    <div className="mt-6 rounded-xl border bg-white p-6 shadow-md">
-      <h2 className="mb-6 text-2xl font-bold">
+    <section className="rounded-3xl bg-white p-8 shadow-xl">
+      <h2 className="mb-8 text-3xl font-bold text-gray-800">
         Base Stats
       </h2>
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         {pokemon.stats.map((stat) => (
           <StatBar
             key={stat.stat.name}
@@ -16,6 +16,6 @@ export default function PokemonStats({ pokemon }) {
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 }

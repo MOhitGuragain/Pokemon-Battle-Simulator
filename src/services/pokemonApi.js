@@ -7,7 +7,30 @@ export async function getPokemonList(limit = 151) {
     throw new Error("Failed to fetch Pokémon.");
   }
 
-  return response.json();
+  const data = await response.json();
+
+  const pokemonList = await Promise.all(
+    data.results.map(async (pokemon) => {
+      const detailResponse = await fetch(pokemon.url);
+
+      if (!detailResponse.ok) {
+        throw new Error(`Failed to fetch ${pokemon.name}`);
+      }
+
+      const detail = await detailResponse.json();
+
+      return {
+        id: detail.id,
+        name: detail.name,
+        image:
+          detail.sprites.other["official-artwork"].front_default,
+        sprite: detail.sprites.front_default,
+        types: detail.types.map((type) => type.type.name),
+      };
+    })
+  );
+
+  return pokemonList;
 }
 
 export async function getPokemonDetails(id) {

@@ -1,27 +1,41 @@
-// src/components/pokemon/PokemonCard.jsx
 import { Link } from "react-router-dom";
-export default function PokemonCard({ pokemon }) {
-  const id = pokemon.url.split("/").filter(Boolean).pop();
 
-  const image = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+import TypeBadge from "./TypeBadge";
+import { typeGradients } from "../../utils/pokemonTypes";
+
+export default function PokemonCard({ pokemon }) {
+  const gradient =
+    typeGradients[pokemon.types[0]] || "from-gray-300 to-gray-500";
 
   return (
-    <Link to ={`/pokemon/${id}`}>
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-lg">
-      <img
-        src={image}
-        alt={pokemon.name}
-        className="mx-auto h-24 w-24"
-      />
+    <Link to={`/pokemon/${pokemon.id}`}>
+      <div
+        className={`group relative overflow-hidden rounded-3xl bg-linear-to-br ${gradient}
+        p-6 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl`}
+      >
+        <p className="absolute right-5 top-5 text-4xl font-black text-white/20">
+          #{String(pokemon.id).padStart(3, "0")}
+        </p>
 
-      <h2 className="mt-4 text-center text-lg font-semibold capitalize">
-        {pokemon.name}
-      </h2>
+        <img
+          src={pokemon.image}
+          alt={pokemon.name}
+          className="mx-auto h-40 w-40 transition-transform duration-300 group-hover:scale-110"
+        />
 
-      <p className="text-center text-sm text-gray-500">
-        #{id.padStart(3, "0")}
-      </p>
-    </div>
+        <h2 className="mt-4 text-center text-2xl font-bold text-white capitalize">
+          {pokemon.name}
+        </h2>
+
+        <div className="mt-4 flex justify-center gap-2">
+          {pokemon.types.map((type) => (
+            <TypeBadge
+              key={type}
+              type={type}
+            />
+          ))}
+        </div>
+      </div>
     </Link>
   );
 }

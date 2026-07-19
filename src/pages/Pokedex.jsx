@@ -10,13 +10,13 @@ export default function Pokedex() {
 
   const { data, isLoading, isError, error } = usePokemonList();
 
-  const filteredPokemon = useMemo(() => {
-    if (!data) return [];
+ const filteredPokemon = useMemo(() => {
+  if (!data) return [];
 
-    return data.results.filter((pokemon) =>
-      pokemon.name.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [data, search]);
+  return data.filter((pokemon) =>
+    pokemon.name.toLowerCase().includes(search.toLowerCase())
+  );
+}, [data, search]);
 
   if (isLoading) {
     return (
