@@ -9,3 +9,13 @@ export async function getPokemonList(limit = 151) {
 
   return response.json();
 }
+
+export async function getPokemonDetails(id) {
+  const response = await fetch(`${BASE_URL}/pokemon/${id}`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch Pokémon details.");
+  }
+
+  return response.json();
+}

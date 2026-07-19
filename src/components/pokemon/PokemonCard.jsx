@@ -1,11 +1,12 @@
 // src/components/pokemon/PokemonCard.jsx
-
+import { Link } from "react-router-dom";
 export default function PokemonCard({ pokemon }) {
   const id = pokemon.url.split("/").filter(Boolean).pop();
 
   const image = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
 
   return (
+    <Link to ={`/pokemon/${id}`}>
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-lg">
       <img
         src={image}
@@ -21,5 +22,6 @@ export default function PokemonCard({ pokemon }) {
         #{id.padStart(3, "0")}
       </p>
     </div>
+    </Link>
   );
 }
