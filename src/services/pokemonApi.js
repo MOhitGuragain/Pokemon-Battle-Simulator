@@ -20,13 +20,32 @@ export async function getPokemonList(limit = 151) {
       const detail = await detailResponse.json();
 
       return {
-        id: detail.id,
-        name: detail.name,
-        image:
-          detail.sprites.other["official-artwork"].front_default,
-        sprite: detail.sprites.front_default,
-        types: detail.types.map((type) => type.type.name),
-      };
+  id: detail.id,
+  name: detail.name,
+
+  image:
+    detail.sprites.other["official-artwork"].front_default,
+
+  sprite: detail.sprites.front_default,
+
+  types: detail.types.map((type) => type.type.name),
+
+  height: detail.height,
+  weight: detail.weight,
+
+  abilities: detail.abilities.map(
+    (ability) => ability.ability.name
+  ),
+
+  stats: {
+    hp: detail.stats[0].base_stat,
+    attack: detail.stats[1].base_stat,
+    defense: detail.stats[2].base_stat,
+    specialAttack: detail.stats[3].base_stat,
+    specialDefense: detail.stats[4].base_stat,
+    speed: detail.stats[5].base_stat,
+  },
+};
     })
   );
 

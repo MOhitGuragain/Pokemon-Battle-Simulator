@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 
 import TypeBadge from "./TypeBadge";
 import { typeGradients } from "../../utils/pokemonTypes";
+import useTeamStore from "../../store/teamStore";
 
 export default function PokemonCard({ pokemon }) {
   const gradient =
     typeGradients[pokemon.types[0]] || "from-gray-300 to-gray-500";
+    const addPokemon = useTeamStore((state) => state.addPokemon);
 
   return (
     <Link to={`/pokemon/${pokemon.id}`}>
@@ -35,6 +37,15 @@ export default function PokemonCard({ pokemon }) {
             />
           ))}
         </div>
+        <button
+  onClick={(e) => {
+    e.preventDefault();
+    addPokemon(pokemon);
+  }}
+  className="mt-4 w-full rounded-xl bg-white py-2 font-semibold text-gray-800 transition hover:bg-gray-100"
+>
+  Add to Team
+</button>
       </div>
     </Link>
   );
