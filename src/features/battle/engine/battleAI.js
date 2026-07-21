@@ -1,21 +1,19 @@
 import useBattleStore from "../store/battleStore";
-
 import { calculateDamage } from "./damageCalculator";
 import { nextTurn } from "./turnManager";
 import { getRandomMove } from "./getRandomMove";
 
-export async function playerAttack() {
+export async function enemyTurn() {
   const state = useBattleStore.getState();
 
   if (state.winner) return;
-  if (state.turn !== "player") return;
+  if (state.turn !== "enemy") return;
 
   // Get a random move
-  const move = await getRandomMove(state.player);
+  const move = await getRandomMove(state.enemy);
 
   const hit =
   Math.random() * 100 <= move.accuracy;
-  console.log(move);
 
 if (!hit) {
   const moveName = move.name
@@ -23,7 +21,7 @@ if (!hit) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
   state.addLog(
-    `⚡ ${state.player.name} used ${moveName}!`
+    `⚡ ${state.enemy.name} used ${moveName}!`
   );
 
   state.addLog("❌ But it missed!");
@@ -37,13 +35,13 @@ if (!hit) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
   state.addLog(
-    `⚡ ${state.player.name} used ${moveName}!`
+    `⚡ ${state.enemy.name} used ${moveName}!`
   );
 
-  // Damage calculation (we'll pass the move in the next step)
+  // Damage calculation (we'll update it to use move power/type next)
   const result = calculateDamage(
-  state.player,
   state.enemy,
+  state.player,
   move
 );
 
@@ -61,25 +59,25 @@ if (!hit) {
     state.addLog("❌ It doesn't affect the opponent...");
   }
 
-  state.damageEnemy(damage);
+  state.damagePlayer(damage);
 
   const remainingHP = Math.max(
     0,
-    state.enemyHP - damage
+    state.playerHP - damage
   );
 
   state.addLog(
-    `💢 ${state.enemy.name} lost ${damage} HP!`
+    `💢 ${state.player.name} lost ${damage} HP!`
   );
 
   state.addLog(
-    `❤️ ${state.enemy.name} has ${remainingHP} HP remaining.`
+    `❤️ ${state.player.name} has ${remainingHP} HP remaining.`
   );
 
   if (remainingHP <= 0) {
-    state.addLog(`${state.enemy.name} fainted!`);
-    state.addLog(`🏆 ${state.player.name} wins!`);
-    state.setWinner(state.player.name);
+    state.addLog(`${state.player.name} fainted!`);
+    state.addLog(`🏆 ${state.enemy.name} wins!`);
+    state.setWinner(state.enemy.name);
     return;
   }
 

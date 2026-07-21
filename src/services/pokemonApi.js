@@ -19,7 +19,7 @@ export async function getPokemonList(limit = 151) {
 
       const detail = await detailResponse.json();
 
-      return {
+     return {
   id: detail.id,
   name: detail.name,
 
@@ -45,6 +45,14 @@ export async function getPokemonList(limit = 151) {
     specialDefense: detail.stats[4].base_stat,
     speed: detail.stats[5].base_stat,
   },
+
+  // NEW
+  moves: detail.moves
+    .slice(0, 4)
+    .map((move) => ({
+      name: move.move.name,
+      url: move.move.url,
+    })),
 };
     })
   );
