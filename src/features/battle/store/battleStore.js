@@ -1,58 +1,126 @@
 import { create } from "zustand";
 
 const useBattleStore = create((set) => ({
+  // Active Pokémon
   player: null,
   enemy: null,
 
+  // Full Teams
+  playerTeam: [],
+  enemyTeam: [],
+
+  // Active Pokémon Index
+  activePlayerIndex: 0,
+  activeEnemyIndex: 0,
+
+  // Current HP
   playerHP: 0,
   enemyHP: 0,
 
+  // Turn
   turn: null,
 
+  // Winner
   winner: null,
 
+  // Force player to switch after fainting
+mustSwitchPlayer: false,
+
+  // Battle Log
   battleLog: [],
 
-  initializeBattle(player, enemy) {
+  initializeBattle(playerTeam, enemyTeam) {
+    const initializedPlayerTeam = playerTeam.map((pokemon) => ({
+  ...pokemon,
+  currentHP: pokemon.stats.hp,
+}));
+
+const initializedEnemyTeam = enemyTeam.map((pokemon) => ({
+  ...pokemon,
+  currentHP: pokemon.stats.hp,
+}));
+
+const player = initializedPlayerTeam[0];
+const enemy = initializedEnemyTeam[0];
+
     const firstTurn =
       player.stats.speed >= enemy.stats.speed
         ? "player"
         : "enemy";
 
     set({
+      // Active Pokémon
       player,
       enemy,
 
-      playerHP: player.stats.hp,
-      enemyHP: enemy.stats.hp,
+      // Teams
+      playerTeam: initializedPlayerTeam,
+enemyTeam: initializedEnemyTeam,
 
+      // Active Pokémon Index
+      activePlayerIndex: 0,
+      activeEnemyIndex: 0,
+
+      // HP
+      playerHP: player.currentHP,
+enemyHP: enemy.currentHP,
+      
+
+      // Battle State
       turn: firstTurn,
-
       winner: null,
+      mustSwitchPlayer: false,
 
+      // Battle Log
       battleLog: [
-        `${player.name} entered the battle!`,
-        `${enemy.name} appeared!`,
+        `⚔️ ${player.name} entered the battle!`,
+        `👾 ${enemy.name} appeared!`,
         `${
           firstTurn === "player"
-            ? player.name
-            : enemy.name
+            ? `⚡ ${player.name}`
+            : `⚡ ${enemy.name}`
         } moves first!`,
       ],
     });
   },
 
   damagePlayer(amount) {
-    set((state) => ({
-      playerHP: Math.max(0, state.playerHP - amount),
-    }));
-  },
+  set((state) => {
+    const newHP = Math.max(0, state.playerHP - amount);
 
-  damageEnemy(amount) {
-    set((state) => ({
-      enemyHP: Math.max(0, state.enemyHP - amount),
-    }));
-  },
+    const updatedPlayerTeam = [...state.playerTeam];
+
+    updatedPlayerTeam[state.activePlayerIndex] = {
+      ...updatedPlayerTeam[state.activePlayerIndex],
+      currentHP: newHP,
+    };
+
+    return {
+      playerHP: newHP,
+      player: updatedPlayerTeam[state.activePlayerIndex],
+      playerTeam: updatedPlayerTeam,
+    };
+  });
+},
+
+damageEnemy(amount) {
+  set((state) => {
+    const newHP = Math.max(0, state.enemyHP - amount);
+
+    const updatedEnemyTeam = [...state.enemyTeam];
+
+    updatedEnemyTeam[state.activeEnemyIndex] = {
+      ...updatedEnemyTeam[state.activeEnemyIndex],
+      currentHP: newHP,
+    };
+
+    return {
+      enemyHP: newHP,
+      enemy: updatedEnemyTeam[state.activeEnemyIndex],
+      enemyTeam: updatedEnemyTeam,
+    };
+  });
+},
 
   setTurn(turn) {
     set({ turn });
@@ -62,10 +130,72 @@ const useBattleStore = create((set) => ({
     set({ winner: name });
   },
 
+  setMustSwitchPlayer(value) {
+  set({ mustSwitchPlayer: value });
+},
+
   addLog(message) {
     set((state) => ({
       battleLog: [...state.battleLog, message],
     }));
+  },
+
+  // ---------- NEW FUNCTIONS ----------
+
+ switchPlayer(index) {
+  set((state) => {
+    const pokemon = state.playerTeam[index];
+
+    return {
+      player: pokemon,
+      activePlayerIndex: index,
+
+      // For now, restore full HP when switched in.
+      // Later we'll preserve HP for each Pokémon.
+      playerHP: pokemon.currentHP,
+
+      battleLog: [
+        ...state.battleLog,
+        `🔄 Go! ${pokemon.name}!`,
+      ],
+    };
+  });
+},
+
+  switchEnemy(index) {
+    set((state) => {
+      const pokemon = state.enemyTeam[index];
+
+      return {
+        enemy: pokemon,
+        activeEnemyIndex: index,
+        enemyHP: pokemon.currentHP,
+      };
+    });
+  },
+
+  resetBattle() {
+    set({
+      player: null,
+      enemy: null,
+
+      playerTeam: [],
+      enemyTeam: [],
+
+      activePlayerIndex: 0,
+      activeEnemyIndex: 0,
+
+      playerHP: 0,
+      enemyHP: 0,
+
+      turn: null,
+
+      winner: null,
+
+      mustSwitchPlayer: false,
+
+      battleLog: [],
+    });
   },
 }));
 

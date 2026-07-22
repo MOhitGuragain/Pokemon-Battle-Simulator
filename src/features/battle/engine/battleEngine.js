@@ -3,6 +3,7 @@ import useBattleStore from "../store/battleStore";
 import { calculateDamage } from "./damageCalculator";
 import { nextTurn } from "./turnManager";
 import { getRandomMove } from "./getRandomMove";
+import { enemyTurn } from "./battleAI";
 
 export async function playerAttack() {
   const state = useBattleStore.getState();
@@ -14,23 +15,7 @@ export async function playerAttack() {
   const move = await getRandomMove(state.player);
 
   const hit =
-  Math.random() * 100 <= move.accuracy;
-  console.log(move);
-
-if (!hit) {
-  const moveName = move.name
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-
-  state.addLog(
-    `⚡ ${state.player.name} used ${moveName}!`
-  );
-
-  state.addLog("❌ But it missed!");
-
-  nextTurn();
-  return;
-}
+    Math.random() * 100 <= move.accuracy;
 
   const moveName = move.name
     .replace(/-/g, " ")
@@ -40,14 +25,23 @@ if (!hit) {
     `⚡ ${state.player.name} used ${moveName}!`
   );
 
-  // Damage calculation (we'll pass the move in the next step)
+  if (!hit) {
+    state.addLog("❌ But it missed!");
+    nextTurn();
+    return;
+  }
+
   const result = calculateDamage(
-  state.player,
-  state.enemy,
-  move
-);
+    state.player,
+    state.enemy,
+    move
+  );
 
   const damage = result.damage;
+
+  if (result.stab) {
+    state.addLog("✨ Same Type Attack Bonus!");
+  }
 
   if (result.critical) {
     state.addLog("💥 Critical Hit!");
@@ -55,7 +49,10 @@ if (!hit) {
 
   if (result.multiplier > 1) {
     state.addLog("🔥 It's super effective!");
-  } else if (result.multiplier < 1 && result.multiplier > 0) {
+  } else if (
+    result.multiplier < 1 &&
+    result.multiplier > 0
+  ) {
     state.addLog("😐 It's not very effective...");
   } else if (result.multiplier === 0) {
     state.addLog("❌ It doesn't affect the opponent...");
@@ -76,11 +73,52 @@ if (!hit) {
     `❤️ ${state.enemy.name} has ${remainingHP} HP remaining.`
   );
 
+  // ---------- Enemy fainted ----------
   if (remainingHP <= 0) {
-    state.addLog(`${state.enemy.name} fainted!`);
-    state.addLog(`🏆 ${state.player.name} wins!`);
-    state.setWinner(state.player.name);
-    return;
+    state.addLog(`💀 ${state.enemy.name} fainted!`);
+
+    // Find the next available enemy Pokémon
+    const nextEnemyIndex = state.enemyTeam.findIndex(
+      (pokemon, index) =>
+        index !== state.activeEnemyIndex &&
+        pokemon.currentHP > 0
+    );
+
+    // No Pokémon left -> Player wins
+    if (nextEnemyIndex === -1) {
+      state.addLog(
+        `🏆 ${state.player.name} wins the battle!`
+      );
+      state.setWinner(state.player.name);
+      return;
+    }
+
+    // Switch to the next Pokémon
+    // Enemy sends out the next Pokémon
+state.addLog(
+  "🎒 Enemy is choosing another Pokémon..."
+);
+
+setTimeout(() => {
+  const battleState = useBattleStore.getState();
+
+  battleState.switchEnemy(nextEnemyIndex);
+
+  const nextPokemon =
+    useBattleStore.getState().enemy;
+
+  battleState.addLog(
+    `👾 Enemy sent out ${nextPokemon.name}!`
+  );
+
+  battleState.setTurn("enemy");
+
+  setTimeout(() => {
+    enemyTurn();
+  }, 800);
+}, 1200);
+
+return;
   }
 
   nextTurn();
