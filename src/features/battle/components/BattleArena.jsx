@@ -28,7 +28,7 @@ export default function BattleArena() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-sky-100 to-green-100 p-8">
+    <main className="min-h-screen bg-linear-to-b from-sky-100 to-green-100 p-8">
       <div className="mx-auto max-w-7xl">
         <h1 className="mb-10 text-center text-5xl font-bold">
           Pokémon Battle

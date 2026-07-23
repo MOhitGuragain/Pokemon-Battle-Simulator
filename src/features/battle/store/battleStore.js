@@ -29,6 +29,13 @@ mustSwitchPlayer: false,
   // Battle Log
   battleLog: [],
 
+  // Attack Animation
+playerAttacking: false,
+enemyAttacking: false,
+
+playerDamaged: false,
+enemyDamaged: false,
+
   initializeBattle(playerTeam, enemyTeam) {
     const initializedPlayerTeam = playerTeam.map((pokemon) => ({
   ...pokemon,
@@ -70,6 +77,13 @@ enemyHP: enemy.currentHP,
       turn: firstTurn,
       winner: null,
       mustSwitchPlayer: false,
+
+      
+playerAttacking: false,
+enemyAttacking: false,
+
+playerDamaged: false,
+enemyDamaged: false,
 
       // Battle Log
       battleLog: [
@@ -134,6 +148,22 @@ damageEnemy(amount) {
   set({ mustSwitchPlayer: value });
 },
 
+  setPlayerAttacking(value) {
+  set({ playerAttacking: value });
+},
+
+setEnemyAttacking(value) {
+  set({ enemyAttacking: value });
+},
+
+setPlayerDamaged(value) {
+  set({ playerDamaged: value });
+},
+
+setEnemyDamaged(value) {
+  set({ enemyDamaged: value });
+},
+
   addLog(message) {
     set((state) => ({
       battleLog: [...state.battleLog, message],
@@ -193,6 +223,12 @@ damageEnemy(amount) {
       winner: null,
 
       mustSwitchPlayer: false,
+
+      playerAttacking: false,
+enemyAttacking: false,
+    
+     playerDamaged: false,
+enemyDamaged: false,
 
       battleLog: [],
     });

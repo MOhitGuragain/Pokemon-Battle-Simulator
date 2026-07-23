@@ -1,29 +1,58 @@
 import useBattleStore from "../store/battleStore";
 
 import { calculateDamage } from "./damageCalculator";
-import { nextTurn } from "./turnManager";
+import { nextTurn, cancelEnemyTurn } from "./turnManager";
 import { getRandomMove } from "./getRandomMove";
 import { enemyTurn } from "./battleAI";
 
 export async function playerAttack() {
-  const state = useBattleStore.getState();
+  let state = useBattleStore.getState();
 
+  // Safety checks
   if (state.winner) return;
   if (state.turn !== "player") return;
 
-  // Get a random move
-  const move = await getRandomMove(state.player);
+  // -------------------------------
+  // Attack Animation
+  // -------------------------------
+  state.setPlayerAttacking(true);
 
-  const hit =
-    Math.random() * 100 <= move.accuracy;
+  await new Promise((resolve) =>
+    setTimeout(resolve, 300)
+  );
+
+  state = useBattleStore.getState();
+
+  if (
+    state.turn !== "player" ||
+    state.winner
+  ) {
+    state.setPlayerAttacking(false);
+    return;
+  }
+
+  state.setPlayerAttacking(false);
+
+  // -------------------------------
+  // Choose Move
+  // -------------------------------
+  const move = await getRandomMove(state.player);
 
   const moveName = move.name
     .replace(/-/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+    .replace(/\b\w/g, (c) =>
+      c.toUpperCase()
+    );
 
   state.addLog(
     `⚡ ${state.player.name} used ${moveName}!`
   );
+
+  // -------------------------------
+  // Accuracy Check
+  // -------------------------------
+  const hit =
+    Math.random() * 100 <= move.accuracy;
 
   if (!hit) {
     state.addLog("❌ But it missed!");
@@ -31,16 +60,19 @@ export async function playerAttack() {
     return;
   }
 
+  // -------------------------------
+  // Damage Calculation
+  // -------------------------------
   const result = calculateDamage(
     state.player,
     state.enemy,
     move
   );
 
-  const damage = result.damage;
-
   if (result.stab) {
-    state.addLog("✨ Same Type Attack Bonus!");
+    state.addLog(
+      "✨ Same Type Attack Bonus!"
+    );
   }
 
   if (result.critical) {
@@ -48,78 +80,121 @@ export async function playerAttack() {
   }
 
   if (result.multiplier > 1) {
-    state.addLog("🔥 It's super effective!");
+    state.addLog(
+      "🔥 It's super effective!"
+    );
   } else if (
-    result.multiplier < 1 &&
-    result.multiplier > 0
+    result.multiplier > 0 &&
+    result.multiplier < 1
   ) {
-    state.addLog("😐 It's not very effective...");
-  } else if (result.multiplier === 0) {
-    state.addLog("❌ It doesn't affect the opponent...");
+    state.addLog(
+      "😐 It's not very effective..."
+    );
+  } else if (
+    result.multiplier === 0
+  ) {
+    state.addLog(
+      "❌ It doesn't affect the opponent..."
+    );
   }
 
-  state.damageEnemy(damage);
+  // -------------------------------
+  // Apply Damage
+  // -------------------------------
+  state.damageEnemy(result.damage);
 
-  const remainingHP = Math.max(
-    0,
-    state.enemyHP - damage
-  );
+  state.setEnemyDamaged(true);
+
+  setTimeout(() => {
+    useBattleStore
+      .getState()
+      .setEnemyDamaged(false);
+  }, 200);
+
+  // Always fetch latest state
+  state = useBattleStore.getState();
+
+  const remainingHP = state.enemyHP;
 
   state.addLog(
-    `💢 ${state.enemy.name} lost ${damage} HP!`
+    `💢 ${state.enemy.name} lost ${result.damage} HP!`
   );
 
   state.addLog(
     `❤️ ${state.enemy.name} has ${remainingHP} HP remaining.`
   );
 
-  // ---------- Enemy fainted ----------
+  // -------------------------------
+  // Enemy Fainted
+  // -------------------------------
   if (remainingHP <= 0) {
-    state.addLog(`💀 ${state.enemy.name} fainted!`);
-
-    // Find the next available enemy Pokémon
-    const nextEnemyIndex = state.enemyTeam.findIndex(
-      (pokemon, index) =>
-        index !== state.activeEnemyIndex &&
-        pokemon.currentHP > 0
+    state.addLog(
+      `💀 ${state.enemy.name} fainted!`
     );
 
-    // No Pokémon left -> Player wins
-    if (nextEnemyIndex === -1) {
-      state.addLog(
-        `🏆 ${state.player.name} wins the battle!`
+    const nextEnemyIndex =
+      state.enemyTeam.findIndex(
+        (pokemon, index) =>
+          index !==
+            state.activeEnemyIndex &&
+          pokemon.currentHP > 0
       );
-      state.setWinner(state.player.name);
-      return;
-    }
 
-    // Switch to the next Pokémon
-    // Enemy sends out the next Pokémon
-state.addLog(
+    // Player wins
+if (nextEnemyIndex === -1) {
+  cancelEnemyTurn();
+
+  state.addLog(
+    `🏆 ${state.player.name} wins the battle!`
+  );
+
+  state.setWinner(state.player.name);
+
+  return;
+}
+
+    state.addLog(
   "🎒 Enemy is choosing another Pokémon..."
 );
 
+// Cancel any old enemy attack timer
+cancelEnemyTurn();
+
 setTimeout(() => {
-  const battleState = useBattleStore.getState();
+      const latest =
+        useBattleStore.getState();
 
-  battleState.switchEnemy(nextEnemyIndex);
+      latest.switchEnemy(nextEnemyIndex);
 
-  const nextPokemon =
-    useBattleStore.getState().enemy;
+      const updated =
+        useBattleStore.getState();
 
-  battleState.addLog(
-    `👾 Enemy sent out ${nextPokemon.name}!`
-  );
+      updated.addLog(
+        `👾 Enemy sent out ${updated.enemy.name}!`
+      );
 
-  battleState.setTurn("enemy");
+      // Temporary until Step 4
+      updated.setTurn("enemy");
 
-  setTimeout(() => {
-    enemyTurn();
-  }, 800);
-}, 1200);
+      setTimeout(() => {
+        const current =
+          useBattleStore.getState();
 
-return;
+        if (
+          current.turn === "enemy" &&
+          !current.winner &&
+          !current.mustSwitchPlayer
+        ) {
+          enemyTurn();
+        }
+      }, 700);
+    }, 1200);
+
+    return;
   }
 
+  // -------------------------------
+  // Continue Battle
+  // -------------------------------
   nextTurn();
 }

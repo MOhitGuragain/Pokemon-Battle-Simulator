@@ -1,6 +1,8 @@
 import useBattleStore from "../store/battleStore";
-import { nextTurn } from "../engine/turnManager";
-import { enemyTurn } from "../engine/battleAI";
+import {
+  nextTurn,
+  continueBattleAfterSwitch,
+} from "../engine/turnManager";
 
 export default function SwitchPokemon({
   isOpen,
@@ -20,14 +22,6 @@ export default function SwitchPokemon({
 
   const mustSwitchPlayer = useBattleStore(
     (state) => state.mustSwitchPlayer
-  );
-
-  const setMustSwitchPlayer = useBattleStore(
-    (state) => state.setMustSwitchPlayer
-  );
-
-  const setTurn = useBattleStore(
-    (state) => state.setTurn
   );
 
   if (!isOpen) return null;
@@ -52,20 +46,11 @@ export default function SwitchPokemon({
                 onClose();
 
                 if (mustSwitchPlayer) {
-                  // Player is replacing a fainted Pokémon
-                  setMustSwitchPlayer(false);
-                  setTurn("enemy");
-
-                  setTimeout(() => {
-                    enemyTurn();
-                  }, 800);
+                  // Replacing a fainted Pokémon
+                  continueBattleAfterSwitch();
                 } else {
-                  // Normal switch uses the player's turn
+                  // Manual switch consumes the player's turn
                   nextTurn();
-
-                  setTimeout(() => {
-                    enemyTurn();
-                  }, 800);
                 }
               }}
               className={`flex w-full items-center justify-between rounded-2xl border p-4 transition ${
