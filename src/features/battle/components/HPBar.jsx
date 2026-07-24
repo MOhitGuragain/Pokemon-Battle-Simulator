@@ -4,34 +4,54 @@ export default function HPBar({ hp, maxHp }) {
     (hp / maxHp) * 100
   );
 
-  const color =
-    percentage > 50
-      ? "bg-green-500"
-      : percentage > 20
-      ? "bg-yellow-400"
-      : "bg-red-500";
+  let color = "from-green-400 to-green-600";
+
+  if (percentage <= 50) {
+    color = "from-yellow-300 to-yellow-500";
+  }
+
+  if (percentage <= 20) {
+    color = "from-red-400 to-red-600";
+  }
 
   return (
-    <div className="mt-4">
-      <div className="mb-2 flex justify-between text-sm font-semibold">
-        <span>HP</span>
+    <div className="space-y-2">
+      {/* HP Header */}
+      <div className="flex items-center justify-between">
+        <span className="font-bold tracking-wide text-gray-700">
+          HP
+        </span>
 
-        <span>
+        <span className="text-sm font-semibold text-gray-600">
           {hp} / {maxHp}
         </span>
       </div>
 
-      <div className="h-5 overflow-hidden rounded-full border border-gray-400 bg-gray-200 shadow-inner">
+      {/* HP Bar */}
+      <div className="h-6 overflow-hidden rounded-full border border-gray-300 bg-gray-200 shadow-inner">
+
         <div
-          className={`${color} h-full transition-all duration-700 ease-out`}
+          className={`h-full bg-gradient-to-r ${color} transition-all duration-700 ease-out`}
           style={{
             width: `${percentage}%`,
           }}
         />
+
       </div>
 
-      <div className="mt-1 text-right text-xs text-gray-500">
-        {Math.round(percentage)}%
+      {/* Footer */}
+      <div className="flex justify-between text-xs text-gray-500">
+        <span>
+          {Math.round(percentage)}%
+        </span>
+
+        <span>
+          {percentage > 50
+            ? "Healthy"
+            : percentage > 20
+            ? "In Danger"
+            : "Critical"}
+        </span>
       </div>
     </div>
   );

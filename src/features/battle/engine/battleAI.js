@@ -130,6 +130,14 @@ export async function enemyTurn() {
   // Player Fainted
   // -------------------------------
   if (remainingHP <= 0) {
+    state.setPlayerFainted(true);
+
+// Let the faint animation finish
+await new Promise((resolve) =>
+  setTimeout(resolve, 800)
+);
+
+state = useBattleStore.getState();
     state.addLog(
       `💀 ${state.player.name} fainted!`
     );
@@ -151,6 +159,7 @@ if (!hasRemainingPokemon) {
     `🏆 ${state.enemy.name} wins the battle!`
   );
 
+  state.setPlayerFainted(false);
   state.setWinner(state.enemy.name);
 
   return;

@@ -3,7 +3,7 @@ import useBattleStore from "../store/battleStore";
 import { calculateDamage } from "./damageCalculator";
 import { nextTurn, cancelEnemyTurn } from "./turnManager";
 import { getRandomMove } from "./getRandomMove";
-import { enemyTurn } from "./battleAI";
+// import { enemyTurn } from "./battleAI";
 
 export async function playerAttack() {
   let state = useBattleStore.getState();
@@ -128,9 +128,18 @@ export async function playerAttack() {
   // Enemy Fainted
   // -------------------------------
   if (remainingHP <= 0) {
+    state.setEnemyFainted(true);
+
+// Let the animation finish
+await new Promise((resolve) =>
+  setTimeout(resolve, 800)
+);
+
+state = useBattleStore.getState();
     state.addLog(
       `💀 ${state.enemy.name} fainted!`
     );
+    
 
     const nextEnemyIndex =
       state.enemyTeam.findIndex(
@@ -148,6 +157,7 @@ if (nextEnemyIndex === -1) {
     `🏆 ${state.player.name} wins the battle!`
   );
 
+  state.setEnemyFainted(false);
   state.setWinner(state.player.name);
 
   return;
@@ -161,34 +171,32 @@ if (nextEnemyIndex === -1) {
 cancelEnemyTurn();
 
 setTimeout(() => {
-      const latest =
-        useBattleStore.getState();
+  const latest =
+    useBattleStore.getState();
 
-      latest.switchEnemy(nextEnemyIndex);
+  latest.switchEnemy(nextEnemyIndex);
 
-      const updated =
-        useBattleStore.getState();
+  latest.setEnemyFainted(false);
+  latest.setEnemyEntering(true);
 
-      updated.addLog(
-        `👾 Enemy sent out ${updated.enemy.name}!`
-      );
+  const updated =
+    useBattleStore.getState();
 
-      // Temporary until Step 4
-      updated.setTurn("enemy");
+  updated.addLog(
+    `👾 Enemy sent out ${updated.enemy.name}!`
+  );
 
-      setTimeout(() => {
-        const current =
-          useBattleStore.getState();
+  setTimeout(() => {
+    const current =
+      useBattleStore.getState();
 
-        if (
-          current.turn === "enemy" &&
-          !current.winner &&
-          !current.mustSwitchPlayer
-        ) {
-          enemyTurn();
-        }
-      }, 700);
-    }, 1200);
+    current.setEnemyEntering(false);
+
+    current.setTurn("enemy");
+
+    nextTurn();
+  }, 500);
+}, 1200);
 
     return;
   }

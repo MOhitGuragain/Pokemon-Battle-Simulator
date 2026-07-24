@@ -36,6 +36,12 @@ enemyAttacking: false,
 playerDamaged: false,
 enemyDamaged: false,
 
+playerFainted: false,
+enemyFainted: false,
+
+playerEntering: false,
+enemyEntering: false,
+
   initializeBattle(playerTeam, enemyTeam) {
     const initializedPlayerTeam = playerTeam.map((pokemon) => ({
   ...pokemon,
@@ -84,6 +90,13 @@ enemyAttacking: false,
 
 playerDamaged: false,
 enemyDamaged: false,
+
+playerFainted: false,
+enemyFainted: false,
+
+playerEntering: false,
+enemyEntering: false,
+
 
       // Battle Log
       battleLog: [
@@ -163,7 +176,21 @@ setPlayerDamaged(value) {
 setEnemyDamaged(value) {
   set({ enemyDamaged: value });
 },
+setPlayerFainted(value) {
+  set({ playerFainted: value });
+},
 
+setEnemyFainted(value) {
+  set({ enemyFainted: value });
+},
+
+setPlayerEntering(value) {
+  set({ playerEntering: value });
+},
+
+setEnemyEntering(value) {
+  set({ enemyEntering: value });
+},
   addLog(message) {
     set((state) => ({
       battleLog: [...state.battleLog, message],
@@ -229,6 +256,12 @@ enemyAttacking: false,
     
      playerDamaged: false,
 enemyDamaged: false,
+
+playerFainted: false,
+enemyFainted: false,
+
+playerEntering: false,
+enemyEntering: false,
 
       battleLog: [],
     });
